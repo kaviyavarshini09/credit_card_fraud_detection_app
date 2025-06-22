@@ -1,28 +1,33 @@
 import streamlit as st
 import pickle
+import xgboost as xgb
 import numpy as np
-import pickle
 
+# Load trained model
 with open("xgb_model.pkl", "rb") as f:
     model = pickle.load(f)
 
+# Load scaler
+with open("scaler.pkl", "rb") as f:
+    scaler = pickle.load(f)
 
-model = pickle.load(open('xgb_model.pkl', 'rb'))
+st.title("Credit Card Fraud Detection App")
 
-st.title("💳 Credit Card Fraud Detection App")
+st.write("Enter transaction features below (comma-separated):")
 
-st.write("Enter 29 numbers (V1 to V28 and normAmount) separated by commas")
+# Collect user input
+user_input = st.text_input("Input 30 values:")
 
-user_input = st.text_input("Example: 0.1, -1.3, ..., 0.9")
-
-if st.button("Predict"):
+if user_input:
     try:
-        values = [float(i) for i in user_input.split(',')]
-        if len(values) != 29:
-            st.error("❗ Please enter exactly 29 values.")
+        input_list = [float(i) for i in user_input.split(",")]
+        input_array = np.array(input_list).reshape(1, -1)
+        scaled_input = scaler.transform(input_array)
+        prediction = model.predict(scaled_input)
+
+        if prediction[0] == 1:
+            st.error("❌ Fraud Detected!")
         else:
-            result = model.predict(np.array(values).reshape(1, -1))
-            label = "🚨 Fraud" if result[0] == 1 else "✅ Legit"
-            st.success(f"Prediction: {label}")
+            st.success("✅ No Fraud Detected.")
     except:
-        st.error("❗ Invalid input format.")
+        st.warning("Please enter exactly 30 comma-separated numeric values.")
