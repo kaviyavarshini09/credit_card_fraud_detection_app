@@ -1,6 +1,11 @@
 import streamlit as st
 import pickle
 import numpy as np
+import pickle
+
+with open("xgb_model.pkl", "rb") as f:
+    model = pickle.load(f)
+
 
 model = pickle.load(open('xgb_model.pkl', 'rb'))
 
